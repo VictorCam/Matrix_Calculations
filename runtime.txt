@@ -1,0 +1,54 @@
+using a random matrix size of 100 using both cout and output to a file
+
+3.27 matrix 1 
+3.21 matrix 2
+3.14 matrix 3
+3.42 matrix 4
+3.42 matrix 5
+3.47 matrix 6
+4.38 matrix 7
+3.26 matrix 8
+3.37 matrix 9
+3.22 matrix 10
+average is 3.416
+
+
+
+3.44 matrixv2 1
+3.99 matrixv2 2
+4.12 matrixv2 3
+3.96 matrixv2 4
+4.19 matrixv2 5
+3.06 matrixv2 6
+3.16 matrixv2 7
+3.76 matrixv2 8
+4.18 matrixv2 9
+3.87 matrixv2 10
+average is 3.773
+
+using the same matrix size of 100 using just a output file
+
+0.009943 matrix 1
+0.009973 matrix 2
+0.009945 matrix 3
+0.008978 matrix 4
+0.015956 matrix 5
+0.008007 matrix 6
+0.008935 matrix 7
+0.008975 matrix 8
+0.008985 matrix 9
+0.009973 matrix 10
+average is 0.0099
+
+0.009977 matrixv2 1
+0.008932 matrixv2 2
+0.008977 matrixv2 3
+0.012966 matrixv2 4
+0.009945 matrixv2 5
+0.008975 matrixv2 6
+0.012939 matrixv2 7
+0.010942 matrixv2 8
+0.011954 matrixv2 9
+0.008935 matrixv2 10
+average is 0.0105
+

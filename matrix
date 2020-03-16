@@ -1,0 +1,436 @@
+#!/bin/bash
+
+# * Program Filename: matrix (assign1)
+# * Author: Victor Daniel Campa
+# * Date: 10/14/19
+# * Description: does matricies math includes dims which gets the rows and columns, transpose which changes a M x N matrix into a N X M
+# * mean takes the sum of the columns and does proper rounding and produces a 1 x N row, add takes the same dimensions of a matrix and add
+# * them together, and finally multiply which takes a M x P and N x P and produces a M x P matrix where the columns of the first file must be equal
+# * the the second files rows where the multiplication is non communitive. This also takes into account stdin input for the ones who use one file.
+
+command="false" #this command is initally false until it gets a valid command.
+
+######################################
+# * Function: checkfile
+# * Description: checks if a file exists and if the command is valid with the correct amount of arguements
+# * Parameter: NONE
+# * Pre-Conditions: gets the initial command which is false
+# * Post-Conditions changes the command variable to the corresponding command if it's a valid execution, and creates the variable stdin if using the pipe syntax
+#######################################
+checkfile()
+{
+    if [ -f "$1" ] #check if the first command is a file
+      then
+        if [ -z  "$2" ] #if cmd is "matrix m1" then it should also be invalid
+          then
+            echo "COMMAND FAILED ERROR CODE #1" 1>&2 #fails when typed "./matrix m1"
+            exit 1 #does the proper error exit along with 1>&2
+          else
+            echo "COMMAND FAILED ERROR CODE #2" 1>&2 #fails when typed "./matrix m1 m2"
+            exit 1 #does the proper error exit along with 1>&2
+        fi
+      else
+        if [ -f "$2" ] #checks if the second command is a file
+          then
+            if [[ "$1" == "dims" && -z "$3" || "$1" == "transpose" && -z "$3" || "$1" == "mean" && -z "$3" ]] #if the 2nd cmd is a file then is the 1st command a valid command command arguement for dims transpose and mean and the 3rd arguement is 0
+              then
+                command="$1" #if command is valid and the third is not entered then command variable equals the corresponding command in cmd
+              else
+                if [ -f "$3" ] #check if the third command is a valid file
+                  then
+                    columns1=$( cat $2 | wc -l )
+                    rows1=$( cat $2 | tail -1 | tr '\t' '\n' | wc -l )
+                    columns2=$( cat $3 | wc -l )
+                    rows2=$( cat $3 | tail -1 | tr '\t' '\n' | wc -l )
+                    #if there is a valid third file then I want to get the rows and columns for both the files to see if add are the rights dimensions
+                    if [[ "$1" == "add" && -z "$4" && "$columns1" == "$columns2" && "$rows1" == "$rows2" || "$1" == "multiply" && -z "$4" ]] #check if add is valid dimensions and if multiply is using just two files
+                      then
+                        command="$1" #if the if statment is true then I assign command to add or multiply depending on which one it corresponds to if it does not exist then command will still equal false
+                    fi
+                fi
+            fi
+        elif [[ ! -t 0 ]] #checks if I are using stdin input
+          then
+            if [[ "$1" == "dims" && -z "$2" || "$1" == "transpose" && -z "$2" || "$1" == "mean" && -z "$2" ]] #this if statement is used to check if stdin for these three function and makes sure it has the right number of arguements
+              then
+                command="$1" #if true then assign the command arguement to command
+                input="stdin" #since I are using stdin input I want to enter an if statement to get the input to a file
+            fi
+        else
+          echo "ERROR #5" 1>&2 #fails when typed "./matrix eoiafj"
+          exit 1 #does the proper error exit along with 1>&2
+        fi
+    fi
+}
+
+
+######################################
+# * Function: dims
+# * Description: gets the rows and columns from a file or through stdin input
+# * Parameter: NONE
+# * Pre-Conditions: gets the input to either be stdin or a file by determining if input is equal to stdin
+# * Post-Conditions prints out the rows and the columns
+#######################################
+dims ()
+{
+  if [[ "$input" == "stdin" ]] #check if it's input is stdin
+    then
+      while read line
+      do
+        echo "$line" >> tmp #if true then echo the contents into a temp file
+      done < "${line:-/dev/stdin}"
+
+      file="tmp"
+
+      #gets the rows and the columns using stdin
+      columns=$( cat "$file" | wc -l )
+      rows=$( cat "$file" | tail -1 | tr '\t' '\n' | wc -l )
+      echo -n "$columns "
+      echo "$rows"
+      rm tmp
+  else
+  #else I are using a file and instead using $2 to get the rows and columns from the file
+  columns=$( cat $2 | wc -l )
+  rows=$( cat $2 | tail -1 | tr '\t' '\n' | wc -l )
+  echo -n "$columns "
+  echo "$rows"
+fi
+}
+
+######################################
+# * Function: transpose
+# * Description: converts a M X N matrix into a N X M matrix instead. Will be using a do while for loop in order to loop through the correct.
+# * number of times for the matrix. I will be creating variable that will increment inside the do while for loop and outside the do while
+# * for loop in order to offset the values in the right position when it's cutting. The reason why I'm offsetting is because my info is
+# * because my next temp1 file will have the contents of the file in one line and need to get a particular position.
+# * Parameter: NONE
+# * Pre-Conditions: gets the input to either be stdin or a file by determining if input is equal to stdin
+# * Post-Conditions prints out the rows and the columns in N X M format
+#######################################
+transpose ()
+{
+  if [[ "$input" == "stdin" ]] #check if it's input is stdin
+    then
+      while read line
+      do
+        echo "$line" >> tmp #if true then echo the contents into a temp file
+      done < "${line:-/dev/stdin}"
+      cat tmp | tr "\n" "\t" >> temp1 #make the tmp file have no new lines thus everything in temp1 is all in one line
+      echo "" >> temp1  #need to add an echo like this since it needs a null term character
+      file="temp1"
+      #I get the rows and cols of the stdin temp file then I remove the tmp file
+      cols=$( cat "tmp" | wc -l )
+      rows=$( cat $2 | tail -1 | tr '\t' '\n' | wc -l )
+      rm tmp
+  else
+      #then I are taking from a file instead
+      cat $2 | tr "\n" "\t" > temp1 #I make this a one line file
+      echo "" >> temp1 #need to add an echo like this since it needs a null term character
+      file='temp1'
+      #I get the rows and col of the file directly
+      cols=$( cat $2 | wc -l )
+      rows=$( cat $2 | tail -1 | tr '\t' '\n' | wc -l )
+  fi
+
+#added count and count2 so when it enters my do while for loop it will cut the first number
+  count=$(( $count + 1 ))
+  count2=$(( $count2 + 1 ))
+
+#I am using a while for loop in order to loop the right number of times on the file
+  while read numbers
+  do
+      for i in $numbers
+      do
+        temp1=$( cut -f $count $file ) #I cut to the position according to $count
+        counter=$(( $counter + 1 )) #I add one to counter to eventually enter the if statement
+
+        if [[ $counter == $cols ]] #if the columns are equal to the counter then I make a newline else I add a tab
+          then
+            count2=$(( $count2 + 1 )) #I increment count2 by one so when I reset my count I get to the right position of my count file
+            count=$(( $count - $count )) #I reset my count because if I leave count how it is then it will go out of bounds for the next cut
+            count=$(( $count + $count2 )) #I add count using count2 to get back to the right position of next number that needs to be cut
+            counter=$(( $counter - $counter )) #I reset counter so that it enters this part of the code again
+            echo -e -n "$temp1\n" >> newfile #echo the value cut with a new line to the final temp file
+        else
+            count=$(( $count + $rows )) #I use the rows of count to offset to the next number of count
+            echo -e -n "$temp1\t" >> newfile #echo the value cut with a tab to the final temp file
+      fi
+      done
+  done < $file
+  cat "newfile"
+  rm temp1 newfile
+}
+
+######################################
+# * Function: add
+# * Description: adds two matrixes together does not need to use stdin since we have to read two files using counts
+# * Parameter: NONE
+# * Pre-Conditions: NONE
+# * Post-Conditions: adds two matricies together that are both the same matrix size
+#######################################
+add ()
+{
+  cat "$2" | tr "\t" "\n" >> temp1 #change tabs into newlines
+  cat "$3" | tr "\t" "\n" >> temp2 #change tabs into newlines
+  paste temp1 temp2 | tr "\n" "\t" > temp3 #put both the files into one and change newlines into tabs
+  echo "" >> temp3 #I add an echo since we need the terminator
+
+
+  file='temp3' #temp3 contains the numbers of temp1 and temp2 in one line
+
+  cols=$(($cols + $rows1)) #gets the cols and row1 in order to know where to add newline
+
+  while read numbers
+  do
+      for i in $numbers
+      do
+        count=$(( $count + 1 )) #counts by 1 3 5 7...etc
+        count2=$(( $count2 + 2 )) #counts by 2 4 6 8...etc
+        counter=$(( $counter + 1 )) #counter is used to check when to add a new line
+
+        temp1=$( cut -f $count $file ) #count by the count number
+        temp2=$( cut -f $count2 $file ) #count by the count2 number
+        next1=$( cut -f $(( $count + 2)) $file )
+        next2=$( cut -f $(( $count2 + 2)) $file )
+      if [[ -z "$temp1" || -z "$temp2" ]] #if there is a cut that is out of bounds then we break out of the while loop
+        then
+          break
+      else
+        if [[ "$counter" == $(( $cols )) ]] #check when we have to use a newline
+          then
+              add=`expr "$temp1" + "$temp2"` #add the cuts together
+              echo -e -n "$add" >> newfile #put the sum into a newfile
+              echo -e -n "\n" >> newfile #adding a newline
+              cols=$(($cols + $rows1)) #change the position of the newline
+        elif [[ -z "$next1" || -z "$next2" ]] #end of line number
+          then
+            add=`expr "$temp1" + "$temp2"` #adds the cuts together
+            echo -e -n "$add" >> newfile #put the sum into a newfile without a newline
+        else
+          #echo "GO"
+            add=`expr "$temp1" + "$temp2"` #adds the cuts together
+            echo -e -n "$add\t" >> newfile #puts the sum into a newfile with just a tab
+        fi
+      fi
+        count=`expr $count + 1` #adding this plus one at the end so count2 is offset and at the right position
+      done
+  done < $file
+  cat "newfile"
+  rm temp1 temp2 temp3 newfile
+}
+
+######################################
+# * Function: mean
+# * Description: takes the columns and add them all together and divides them using the formula form the assignment
+# * where we need the amount of what is being added and the sum of them. Finally they are displayed in one row.
+# * Parameter: NONE
+# * Pre-Conditions: gets the input to either be stdin or a file by determining if input is equal to stdin
+# * Post-Conditions: takes the rows add then add them all and divide using rounding
+#######################################
+mean()
+{
+  if [[ "$input" == "stdin" && "$1" ]] #check if it's stdin
+    then
+      while read line
+      do
+        echo "$line" >> tmp #puts my stdin into a temporary file
+      done < "${line:-/dev/stdin}"
+
+      #gets the rows and the cols of the temporary file from stdin
+      colmean=$( cat "tmp" | wc -l )
+      rowmean=$( cat "tmp" | tail -1 | tr '\t' '\n' | wc -l )
+      cat tmp | tr "\n" "\t" >> temp1
+      echo "" >> temp1
+      file="temp1"
+      rm tmp
+  else
+      #if this is not stdin then we use this where $2 is the file
+      colmean=$( cat $2 | wc -l )
+      rowmean=$( cat $2 | tail -1 | tr '\t' '\n' | wc -l )
+      cat "$2" | tr "\n" "\t" >> temp1 #I get rid of the new line so now temp1 is one line
+      echo "" >> temp1 #I add this to put the null terminator at the end
+      file='temp1'
+  fi
+
+
+  #I use count and counter2 to start the positions of where to cut
+  count=`expr $count + 1`
+  count2=`expr $count2 + 1`
+
+  while read numbers
+  do
+      for i in $numbers
+      do
+        temp1=$( cut -f $count $file ) #I cut here to get the position
+        next1=$( cut -f $(($count + 1)) $file ) #I cut the next position
+        counter=`expr $counter + 1` #I need a counter to add newlines
+
+        if [[ "$counter" == "$colmean" ]] #I cols to know when to add a newline
+          then
+            if [[ -z $next1 ]] #if the next value does not exist then we want to do the proper calculations
+              then
+                add=`expr $add + $temp1` #does the addition and division of the one columns
+                divide=$(( ($add + ($colmean / 2) * (($add > 0) * 2 - 1)) / $colmean ))
+                echo -e -n "$divide" >> newfile
+                echo -e -n "\n" >> newfile #reached a newline since next1 does not exist
+                count2=`expr $count2 + 1` #increment count by one so it reaches all the numbers
+                count=`expr $count - $count` #reset count
+                count=`expr $count + $count2` #we move on to the next columns of numbers
+                counter=`expr $counter - $counter` #reset the counter
+                add=`expr $add - $add` #reset add
+            else
+              add=`expr $add + $temp1` #once it reaches a certain amount we want to do the same thing as above except with a tab
+              divide=$(( ($add + ($colmean / 2) * (($add > 0) * 2 - 1)) / $colmean ))
+              echo -e -n "$divide" >> newfile
+              echo -e -n "\t" >> newfile
+              count2=`expr $count2 + 1`
+              count=`expr $count - $count`
+              count=`expr $count + $count2`
+              counter=`expr $counter - $counter`
+              add=`expr $add - $add`
+            fi
+        else
+            count=`expr $count + $rowmean` #the the rows of count
+            add=`expr $add + $temp1` #add the temp1 to it's addition to eventually calculate
+      fi
+      done
+  done < $file
+  cat newfile
+  rm temp1 newfile
+}
+
+######################################
+# * Function: multiply
+# * Description: using two matricies M x P and N x P will produce a M x P my code does this by using one single for loop
+# * and looping through many times and done the calculations by using simple math counters and substraction
+# * Parameter: NONE
+# * Pre-Conditions: NONE
+# * Post-Conditions: produces a matrix multiplication file consisting of many operations
+#######################################
+multiply()
+{
+
+#get the files from $2 and $3 then get the rows and the cols from both the files
+  matrixfile1=$2
+  matrixfile2=$3
+
+  rows=$( cat $matrixfile1 | wc -l )
+  cols=$( cat $matrixfile1 | tail -1 | tr '\t' '\n' | wc -l )
+
+  rows2=$( cat $matrixfile2 | wc -l )
+  cols2=$( cat $matrixfile2 | tail -1 | tr '\t' '\n' | wc -l )
+
+
+  if [[ $cols != $rows2 ]] #we check if it's a valid matrix multiplication if not then we do the neccesary exit status
+    then
+      echo "COMMAND FAILED ERROR CODE #7" 1>&2
+      exit 1
+  fi
+
+  #we make the two files stuck in one line
+  cat $matrixfile1 | tr "\n" "\t" > newfile2
+  cat $matrixfile2 | tr "\n" "\t" >> newfile2
+  echo "" >> newfile2 #null terminator
+
+  file2="newfile2"
+  #counting1 and counting2 and increment3 inc and offset will keep track of the positions to cut
+  #as for stop it will be a trigger to when the program should break and stop executing
+  counting1=$(( $counting1 + 1 ))
+  counting2=$(( $counting2 + ( rows * cols ) + 1 ))
+  increment3=$(( $increment3 + $counting2))
+  inc=$((0))
+  stop=$(( $cols2 * $rows )) #cols2 and rows
+  offset=$(( $rows * $cols ))
+  for (( i = 0; i < 100000; i++ )); do
+
+          if [[ $increment6 == $stop ]] #will eventually reach break once it reaches it suffice number of executions
+            then
+              cat multfile
+              rm newfile2 multfile
+              break
+          fi
+
+          #positions I'm cutting
+          cut1=$( cut -f $counting1 $file2 )
+          cut2=$( cut -f $counting2 $file2 )
+
+          #we increment these variable in order to keep track of the location and it's new lines
+          counting1=$(( $counting1 + 1 ))
+          counting2=$(( $counting2 + $cols )) #5
+          increment1=$(( $increment1 + 1 ))
+          increment4=$(( $increment4 + 1 ))
+
+          multiply=$(( $cut1 * $cut2 ))
+          sum=$(( $sum + $multiply ))
+
+          if [[ "$increment1" == "$rows" ]]
+            then
+              #we need these two increments and index so we don't land at a bad spot
+              increment6=$(( $increment6 + 1 ))
+              increment5=$(( $increment5 + 1 ))
+              index=$(( $increment3 + $increment6 ))
+              if [[ $increment5 == $cols2 ]] #here we print the new number without a new line or tab.
+                then
+                  echo -e -n "$sum" >> multfile
+                  sum=$(( $sum - $sum )) #reset sum
+                  increment1=$(( $increment1 - $increment1 )) #restart the counter again
+                  counting1=$(( $counting1 - $rows )) #go back to original spot again for cut1
+                  counting2=$(( ( $counting2 - $counting2 ) + $index - $cols  * $inc )) #go back to original spot +1 again for cut2
+                  increment5=$(( $increment5 - $increment5 ))
+              else
+                  echo -e -n "$sum\t" >> multfile #print using a tab
+                  sum=$(( $sum - $sum )) #reset sum
+                  increment1=$(( $increment1 - $increment1 )) #restart the counter again
+                  counting1=$(( $counting1 - $rows )) #go back to original spot again for cut1
+                  counting2=$(( ( $counting2 - $counting2 ) + $index - $cols  * $inc )) #go back to original spot +1 again for cut2
+              fi
+            if [[ "$increment4" == $(( $rows2 * $cols2 )) ]] #15 #rows * cols or rows2 * cols2
+              then
+                inc=$(( $inc + 1 ))
+                echo -e -n "\n" >> multfile #print using a newline
+                increment4=$(( $increment4 - $increment4 )) #reseting increment4
+                counting1=$(( $counting1 + $rows )) #offsetting cut1
+                counting2=$(( ( $counting2 - $counting2 ) + $index - $cols  * $inc )) #go back to original spot +1 again for cut2
+              fi
+          fi
+  done
+
+}
+
+######################################
+# * Function: main
+# * Description: just calls functions and start by checking file then going to the proper function
+# * Parameter: NONE
+# * Pre-Conditions: NONE
+# * Post-Conditions NONE
+#######################################
+main ()
+{
+  checkfile $@ #start by checking if the commands are valid
+  if [[ $command == "false" ]]
+    then
+      echo "COMMAND FAILED ERROR CODE #3" 1>&2 #fails when typed "./matrix multiply m1 m2 m3"
+      exit 1 #does the proper error exit along with 1>&2
+      # the following lines check if the command is equal to one of the functions once checkfile has run
+  elif [[ $command == "dims" ]]
+    then
+      dims $@
+  elif [[ $command == "add" ]]
+    then
+      add $@
+  elif [[ $command == "transpose" ]]
+    then
+      transpose $@
+  elif [[ $command == "mean" ]]
+    then
+      mean $@
+  elif [[ $command == "multiply" ]]
+    then
+      multiply $@
+  else
+      echo "COMMAND FAILED ERROR CODE #4" 1>&2
+      exit 1
+  fi
+}
+
+main $@

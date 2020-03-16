@@ -1,0 +1,74 @@
+#!/bin/bash
+
+while read -u 3 left && read -u 4 right
+do
+	echo "left $left"
+	echo -e "\n"
+	echo "right $right"
+done 3<"$1" 4<"$2"
+
+#!/bin/bash
+
+#do we need to know if stdin file is valid???
+
+#cat m1 | tr "\t" "\n" >> temp1 #replaces tabs with new lines
+#cat m3 | tr "\t" "\n" >> temp2 #replaces tabs with new lines
+#paste temp1 temp2 | tr "\n" "\t" >> temp3 #merges files together
+
+file="temp3"
+lineNum=0
+
+
+cols=$(($cols + 4)) #change number depend on newline
+
+while read $file
+do
+    for i in $file
+    do
+      num=$i
+      count=`expr $count + 1` # 1 3 5 7
+      count2=`expr $count2 + 2` # 2 4 6 8
+      counter=$(($counter + 1)) # 1 2 3 4
+
+      echo "counter: $counter"
+      echo "cols: $cols"
+      #echo "colandrow: $colandrow"
+      temp1=$( cut -f $count $file )
+      temp2=$( cut -f $count2 $file )
+      next1=$( cut -f $(( $count + 2)) $file )
+      next2=$( cut -f $(( $count2 + 2)) $file )
+      echo $next1
+    if [[ -z "$temp1" || -z "$temp2" ]]
+      then
+        echo "dead"
+        exit 0
+    else
+      if [[ "$counter" == $(( $cols )) ]]
+        then
+            echo "TAB"
+            add=`expr "$temp1" + "$temp2"`
+            echo -e -n "$add" >> newfile
+            echo -e -n "\n" >> newfile
+            cols=$(($cols + 4)) #change number depend on newline
+      elif [[ -z "$next1" || -z "$next2" ]] #end of line number
+        then
+          echo "NO TAB AT END OF LINE"
+          add=`expr "$temp1" + "$temp2"`
+          echo -e -n "$add" >> newfile
+      else
+        echo "GO"
+          add=`expr "$temp1" + "$temp2"`
+          echo -e -n "$add\t" >> newfile
+      fi
+    fi
+      count=`expr $count + 1`
+      echo ""
+    done
+done < $file
+
+
+#step1 cat m1 | tr "\n" "\t" >> temp1
+#step2 cat m2 | tr "\n" "\t" >> temp2
+#step3 paste temp1 temp1 | tr "\n" "\t" >> finalfilename
+#step4 use the function
+#step5 delete the files using rm temp1 temp2 finalfilename

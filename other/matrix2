@@ -1,0 +1,127 @@
+#!/bin/bash
+
+matrixfile1='em1'
+matrixfile2='em2'
+
+rows=$( cat $matrixfile1 | wc -l ) #3
+cols=$( cat $matrixfile1 | tail -1 | tr '\t' '\n' | wc -l ) #5
+
+rows2=$( cat $matrixfile2 | wc -l ) #5
+cols2=$( cat $matrixfile2 | tail -1 | tr '\t' '\n' | wc -l ) #3
+
+  echo "rows: $rows cols: $cols"
+  echo "rows2: $rows2 cols2: $cols2"
+
+  if [[ $cols > $rows ]]
+    then
+      echo 'FLIP #1'
+      rows=$( cat $matrixfile2 | wc -l ) #3
+      cols=$( cat $matrixfile2 | tail -1 | tr '\t' '\n' | wc -l ) #5
+      rows2=$( cat $matrixfile1 | wc -l ) #5
+      cols2=$( cat $matrixfile1 | tail -1 | tr '\t' '\n' | wc -l ) #3
+      counting1=$(( $counting1 + 1 ))
+      counting2=$(( $counting2 + ( $rows * $cols ) + 1 ))
+      increment3=$(( $increment3 + $counting2))
+      inc=$((0))
+      stop=$(( $cols2 * $rows ))
+      newline=$(( $rows2 * $cols2 ))
+      cat $matrixfile2 | tr "\n" "\t" > newfile2
+      cat $matrixfile1 | tr "\n" "\t" >> newfile2
+  elif [[ $rows == $cols && $rows2 == $cols2 ]]
+    then
+      echo "FLIP HARD"
+      rows=$( cat $matrixfile1 | wc -l ) #3
+      cols=$( cat $matrixfile1 | tail -1 | tr '\t' '\n' | wc -l ) #5
+      rows2=$( cat $matrixfile2 | wc -l ) #5
+      cols2=$( cat $matrixfile2 | tail -1 | tr '\t' '\n' | wc -l ) #3
+      counting1=$(( $counting1 + 1 ))
+      counting2=$(( $counting2 + ( rows * cols ) + 1 ))
+      increment3=$(( $increment3 + $counting2))
+      inc=$((0))
+      newline=$(( $rows2 * $cols2 ))
+      stop=$(( $cols2 * $rows )) #cols2 and rows
+      offset=$(( $rows * $cols ))
+      cat $matrixfile1 | tr "\n" "\t" > newfile2
+      cat $matrixfile2 | tr "\n" "\t" >> newfile2
+  else
+    echo 'FLIP #3'
+    counting1=$(( $counting1 + 1 ))
+    counting2=$(( $counting2 + ( rows * cols ) + 1 ))
+    increment3=$(( $increment3 + $counting2))
+    inc=$((0))
+    newline=$(( $rows2 * $cols2 ))
+    stop=$(( $cols2 * $rows ))
+    offset=$(( $rows * $cols ))
+    cat $matrixfile1 | tr "\n" "\t" > newfile2
+    cat $matrixfile2 | tr "\n" "\t" >> newfile2
+  fi
+
+echo "" >> newfile2
+
+
+file2="newfile2"
+
+for (( i = 0; i < 40000; i++ )); do
+
+        if [[ $increment6 == $stop ]] #17 for m1 m2 and  #76 for mat1 mat2
+          then
+            echo "MY SOL: "
+            cat multfile
+            echo ""
+            echo "ANSWER: "
+            cat em3
+            #number of executions for for loop is 15625 and increment6 is 625
+            rm newfile2 multfile
+            break
+        fi
+
+        cut1=$( cut -f $counting1 $file2 )
+        cut2=$( cut -f $counting2 $file2 )
+
+        counting1=$(( $counting1 + 1 ))
+        counting2=$(( $counting2 + $cols )) #5
+        increment1=$(( $increment1 + 1 ))
+        increment4=$(( $increment4 + 1 ))
+
+
+
+        multiply=$(( $cut1 * $cut2 ))
+
+        sum=$(( $sum + $multiply ))
+
+        #echo "MULT: $cut1 x $cut2 = $multiply"
+        #echo "SUM: $sum"
+
+        #edit
+
+        if [[ "$increment1" == "$cols2" ]]
+          then
+            increment6=$(( $increment6 + 1 ))
+            increment5=$(( $increment5 + 1 ))
+            index=$(( $increment3 + $increment6 ))
+            if [[ $increment5 == $cols ]] #cols or cols2
+              then
+                echo -e -n "$sum" >> multfile
+                sum=$(( $sum - $sum ))
+                increment1=$(( $increment1 - $increment1 )) #restart the counter again
+                counting1=$(( $counting1 - $cols )) #go back to original spot again for cut1 #3
+                counting2=$(( ( $counting2 - $counting2 ) + $index - $rows  * $inc )) #go back to original spot +1 again for cut2
+                increment5=$(( $increment5 - $increment5 ))
+            else
+                echo -e -n "$sum\t" >> multfile
+                sum=$(( $sum - $sum ))
+                increment1=$(( $increment1 - $increment1 )) #restart the counter again
+                counting1=$(( $counting1 - $cols )) #go back to original spot again for cut1 #3
+                counting2=$(( ( $counting2 - $counting2 ) + $index - $rows  * $inc )) #go back to original spot +1 again for cut2
+            fi
+          if [[ "$increment4" == $newline ]] #15 #rows * cols or rows2 * cols2
+            then
+              inc=$(( $inc + 1 ))
+              echo "$inc"
+              echo -e -n "\n" >> multfile
+              increment4=$(( $increment4 - $increment4 ))
+              counting1=$(( $counting1 + $cols )) #offsetting cut1 #3
+              counting2=$(( ( $counting2 - $counting2 ) + $index - $rows  * $inc )) #go back to original spot +1 again for cut2
+            fi
+        fi
+done
