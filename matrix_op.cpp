@@ -25,10 +25,10 @@ int main() {
 
 
   //opening the matrix files and results for storing
-  mat1.open("./mat7"); //used 78 and 56
-  mat2.open("./mat8");
-  mat1_lines.open("./mat7");
-  mat2_lines.open("./mat8");
+  mat1.open("./m3"); //used 78 and 56
+  mat2.open("./m4");
+  mat1_lines.open("./m3");
+  mat2_lines.open("./m4");
   results.open("./results");
 
 
@@ -86,13 +86,15 @@ int main() {
   strcpy(raw_arr2, s2.c_str()); //copy the string into the character array
 
 
-
-  int mat1_arr[10000]; //avoided using (rows1 * cols1) used hardcoded value
-  int mat2_arr[10000]; //avoided using (rows2 * cols2) used hardcoded value
+  int * mat1_arr;
+  int * mat2_arr;
+  mat1_arr = new int [rows1 * cols1]; //avoided using (rows1 * cols1) used hardcoded value
+  mat2_arr = new int [rows2 * cols2]; //avoided using (rows2 * cols2) used hardcoded value
 
 
   //stoi http://www.cplusplus.com/reference/string/stoi/ (unknown but usually linear time)
   //strtok unknown on time complexity
+
 
   //STRTOK IS NOT RELIABLE FOR PARSING LARGE MATRICES
 
@@ -114,6 +116,7 @@ int main() {
   //stoi http://www.cplusplus.com/reference/string/stoi/ (unknown but usually linear time)
   //strtok unknown on time complexity
 
+
   c2 = strtok(raw_arr2, "\t\n ");
   n = 0;
   while(c2 != NULL) {
@@ -126,9 +129,8 @@ int main() {
 
   n2 = n; //this is the number of elements
 
-  int arr[(n1)+(n2)]; //allocate the right size of the array
-
-
+  int *arr;
+  arr = new int[(n1)+(n2)]; //allocate the right size of the array
 
 
   //MISSING A CASE FOR REVERSED ORDER
@@ -148,6 +150,8 @@ int main() {
     arr[y] = mat2_arr[y-(n1)];
   }
 }
+
+cout << "did I fail?" << endl;
 
 //assigns the values in different values so that the matrix multiplication calculation works
 int tmp1 = rows1;
@@ -203,7 +207,6 @@ arr[n1+n2] = (just store values from the two arrays  mat1_arr[] and mat2_arr[])
     stop = cols1 + rows2; //stop is used to keep track on how many times the while loop needs to execute
   }
 
-//int a = 0;
     while(inc6 != stop) { //if running with a 20x20 * 20x20 matrix the number of executions will be 20x20x20 or (8000)
       //cout << "num of exe: " << a << endl;
       //a++;
@@ -217,8 +220,6 @@ arr[n1+n2] = (just store values from the two arrays  mat1_arr[] and mat2_arr[])
       inc1 += 1;
       inc4 += 1;
 
-      //cout << "cut1: " << cut1 << " * " << cut2 << "= " << cut1*cut2 << endl;
-      //cout << "multiply" << endl;
       multiply = cut1 * cut2; //do the multiplication of the two matricies depending on their position
       sum += multiply; //add it to the sum for later printing once we finish a calculated matrix
 
@@ -228,8 +229,6 @@ arr[n1+n2] = (just store values from the two arrays  mat1_arr[] and mat2_arr[])
         index = inc3 + inc6;
         if(inc5 == cols2) { //here we print the new number without a new line or tab.
           results << sum << " ";
-          //cout << sum << endl;
-          //cout << sum << " ";
           sum = 0; //reset sum
           inc1 = 0; //restart the counter again
           counting1 = counting1 - rows1; //go back to original spot again for cut1
@@ -238,8 +237,6 @@ arr[n1+n2] = (just store values from the two arrays  mat1_arr[] and mat2_arr[])
         }
         else {
           results << sum << " ";
-          //cout << sum << endl;
-          //cout << sum << " "; //adds a space
           sum = 0; //reset sum
           inc1 = 0; //restart the counter again
           counting1 = counting1 - rows1; //go back to original spot again for cut1
@@ -247,7 +244,6 @@ arr[n1+n2] = (just store values from the two arrays  mat1_arr[] and mat2_arr[])
         }
       if (inc4 == n2) { //check if inc4 is equal to the number of values in matrix2
         results << endl;
-        //cout << endl; //adds a newline
         pos += cols1; //used for positioning to the right count
         inc4 = 0; //reseting inc4
         counting1 = counting1 + rows1; //go to the next position for cut1
@@ -257,6 +253,6 @@ arr[n1+n2] = (just store values from the two arrays  mat1_arr[] and mat2_arr[])
   }
   end = chrono::system_clock::now();
   chrono::duration<double>seconds = end - start;
-  cout << endl << "total seconds: " << seconds.count() << endl;
+  cout << endl << "[SUCCESS] total seconds: " << seconds.count() << endl;
   return 0;
 }

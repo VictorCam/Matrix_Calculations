@@ -31,9 +31,6 @@ int main() {
   mat2_lines.open("./mat8");
   results.open("./results");
 
-
-
-
   //check if the files are open if not then quit the program
   if(!mat1 || !mat2 || !mat1_lines || !mat2_lines || !results) {
     cout << "unable to open files" << endl;
@@ -44,9 +41,7 @@ int main() {
   }
 
 
-
   //https://stackoverflow.com/questions/32940746/what-is-the-time-complexity-of-this-program (while eof should be linear)
-
   while(!mat1.eof()) { //this gets the rows and the columns for matrix1 O(N)
     mat1.get(c);
     if(c == '\n') {
