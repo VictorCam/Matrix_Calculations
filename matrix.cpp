@@ -32,10 +32,10 @@ int main(int argc, char const *argv[]) {
   int rows2 = 0;
   int cols2 = 0;
 
-  mat1.open("./mat7"); //width must be longer
-  mat2.open("./mat8"); //length must be longer
-  mat1_lines.open("./mat7");
-  mat2_lines.open("./mat8");
+  mat1.open("./m1"); //width must be longer
+  mat2.open("./m2"); //length must be longer
+  mat1_lines.open("./m1");
+  mat2_lines.open("./m2");
   results.open("./results");
   if(!mat1 || !mat2 || !mat1_lines || !mat2_lines || !results) {
     cout << "unable to open mat file(s)" << endl;
@@ -102,23 +102,10 @@ int main(int argc, char const *argv[]) {
   rows2--;
   cols2++;
 
-  /////////////CODE ABOVE DOES NOT DETERMINE TIME COMPLEXITY////////////////
-
+  /////////////CODE ABOVE IS NOT THE ALGORITHM MATRIX ALGORITHM////////////////
   //ABOVE CODE GETS THE ROWS AND COLUMNS OF BOTH FILES WHICH SHOULD BE O(N)
   //ABOVE CODE USES STRTOK TO GET NUMBERS FROM FILE WHICH SHOULD BE O(n log n)
   //ABOVE CODE COULD BE CHANGED IN A WAY WHERE EVERYTHING IS O(N)
-
-/*  for (int i = 0; i < (rows1*cols1); i++) {
-    cout << "mat: " << mat1_arr[i] << endl;
-  }
-
-  for (int i = 0; i < (rows2*cols2); i++) {
-    cout << "mat2: " << mat2_arr[i] << endl;
-  }
-
-  cout << "m1 cols: " << cols1 << endl;
-  cout << "m2 cols: " << cols2 << endl;
-*/
 
   int arr[(rows1*cols1)+(rows2*cols2)];
 
@@ -149,9 +136,7 @@ rows2 = cols2;
 cols2 = tmp2;
 }
 
-  //cout << endl << endl << endl;
-
-
+  ///////////////CODE BELOW IS THE MATRIX MULTIPLICATION ALGORITHM////////////////////
 
   /*STARTING RUNTIME HERE*/
     chrono::time_point<chrono::system_clock> start, end;
@@ -189,7 +174,6 @@ cols2 = tmp2;
 
 int a = 0;
 while(true) {
-  cout << "num of exe: " << a << endl;
   a++;
           if(increment6 == stop){ //will eventually reach break once it reaches it suffice number of executions
               //cat multfile;
@@ -240,8 +224,6 @@ while(true) {
                 }
             if (increment4 == (rows2 * cols2)) { //15 //rows * cols or rows2 * cols2
                 inc += 1;
-                //echo -e -n "\n" >> multfile //print using a newline
-                //cout << endl;
                 results << endl; // NEW
 
                 increment4 -= increment4; //reseting increment4
