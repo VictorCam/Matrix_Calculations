@@ -7,4 +7,4 @@ After this project, I took some time to create a C++ version of the matrix multi
 
 ## Note
 
-The "matrix" file is the bash file and the matrix.cpp is the C++ file
+The "matrix" file is the bash file and the "matrix.cpp" is the C++ file
